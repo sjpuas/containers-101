@@ -5,24 +5,45 @@ services:
     image: mongo:bionic
     ports:
       - 27017:27017
-  # app:
-  #   image: my-app:0.0.1-draft
-  #   build: app
-  #   environment:
-  #     MONGO_HOST: db
-  #   labels:
-  #     - "traefik.backend=traefik"
-  #     - "traefik.port=8181"
-  #     - "traefik.frontend.rule=PathPrefixStrip:/myapp"
-  # proxy:
-  #   image: traefik:alpine
-  #   command: >
-  #     --web --docker --api
-  #     --docker.domain=docker.local --docker.watch
-  #     --accesslogsfile=/dev/stdout --logLevel=DEBUG
-  #   volumes:
-  #     - /var/run/docker.sock:/var/run/docker.sock
-  #     - /dev/null:/traefik.toml
-  #   ports:
-  #     - "80:80"
-  #     - "8080:8080"
+    volumes:
+      - mongo-data:/data/db
+    labels:
+      - traefik.enable=false
+
+  poll-ui:
+    image: poll-ui:0.0.1
+    build: front-app
+    labels:
+      - "traefik.backend=poll-ui"
+      - "traefik.port=80"
+      - "traefik.docker.network=proxy-net"  
+      - "traefik.frontend.rule=PathPrefixStrip:/"
+
+  poll-svc:
+    image: poll-svc:0.0.1
+    build: svc-app
+    environment:
+      MONGO_HOST: db
+    labels:
+      - "traefik.backend=poll-svc"
+      - "traefik.port=8080"
+      - "traefik.docker.network=proxy-net"
+      - "traefik.frontend.rule=PathPrefixStrip:/v1/poll-svc"
+
+  reserve-proxy:
+    image: traefik:alpine
+    command: >
+      --web --docker --api
+      --docker.domain=docker.local --docker.watch
+    labels:
+      - traefik.enable=false
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /dev/null:/traefik.toml
+    ports:
+      - "80:80"
+      - "8080:8080"
+
+
+volumes:
+  mongo-data:
