@@ -17,7 +17,7 @@ Simple demo for Container 101 presentation
 ## Built With
 
 * Reverse Proxy: [Traefik](https://containo.us/traefik/) 
-* Poll-UI: [Angular 7](https://angular.io/) 
+* Poll-UI: [Angular 7](https://angular.io/) and [Nginx](https://www.nginx.com/)
 * Poll-svc: [Spring Boot](https://spring.io/projects/spring-boot) 
 * Database: [MongoDB](https://www.mongodb.com/) 
 
